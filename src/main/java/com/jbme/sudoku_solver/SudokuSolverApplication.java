@@ -3,11 +3,12 @@ package com.jbme.sudoku_solver;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.io.FileNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 
-
 /**
-* Launcher that invokes the other classes of the program: {@link Grille} and
+ * Launcher that invokes the other classes of the program: {@link Grille} and
  * {@link TableauSudoku}. This launcher will load a Sudoku grid in text format
  * located at the path provided as a command-line argument. That grid will be
  * transcribed into an array. Finally, the array will be filled.
@@ -22,6 +23,8 @@ import java.util.Arrays;
 
 @SpringBootApplication
 public class SudokuSolverApplication {
+	private static final Logger log = LoggerFactory.getLogger(SudokuSolverApplication.class);
+
 	/**
 	 * 
 	 * @param args Grid path in text format
@@ -29,22 +32,25 @@ public class SudokuSolverApplication {
 	 */
 
 	public static void main(String[] args) throws FileNotFoundException {
+		SpringApplication.run(SudokuSolverApplication.class, args);
+		log.info("===== SUDOKU SOLVER STARTED =====");
 		String path = args[0];
+		log.info("Loading sudoku from: " + path);
+		log.debug("===== Debug Mod =====");
 
-		// initialisation de la grille
+		// grid Initialization
 		Grid grille1 = new Grid();
 		grille1.setPath(path);
 
-		// transposition de la grille dans un tableau de référence
+		// Transform Grid in Array
 		SudokuSolver solver = new SudokuSolver();
 		solver.setGrid(grille1.read());
 
-		// affichage de la grille
+		// Display Grid
 		System.out.println("\n-SUDOKU A REMPLIR-\n");
 		displayGrid(solver.getGrid());
 
-		// recherche de la première solution. On passe l'arguments "1" à la méthode
-		// remplissageTableau
+		// Search for the 1st Solution with ascending Algorithm (1)
 
 		int[][] resultat1 = solver.fillSudokuGrid(1);
 		if (resultat1 != null) {
@@ -54,10 +60,8 @@ public class SudokuSolverApplication {
 			System.out.println("\n!!!Pas de solutions possible!!!");
 		}
 
-		// création d'un 2e tableau identique à remplir pour la tentative de trouver une 2e solution
-		// avec l'algorithme descendant. On passe donc
-		// l'arguments "2" à la méthode remplissageTableau.
-
+		// Create a second identical array for the nd solution.
+		// Search for 2nd solution with descending algorithm (2)
 		SudokuSolver solver2 = new SudokuSolver();
 		solver2.setGrid(grille1.read());
 
@@ -72,9 +76,9 @@ public class SudokuSolverApplication {
 	}
 
 	/**
-	 * méthode pour afficher les Tableaux dans la console.
+	 * Method to Diplay the Grid.
 	 * 
-	 * @param tab Tableau à afficher.
+	 * @param grid Grid to display.
 	 */
 	public static void displayGrid(int[][] grid) {
 		int[][] display = grid;
@@ -88,5 +92,3 @@ public class SudokuSolverApplication {
 	}
 
 }
-
-

@@ -1,8 +1,8 @@
 package com.jbme.sudoku_solver;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import java.util.ArrayList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  This class allows the solving of a Sudoku board. Two different solving algorithms are available (a search by incrementing the value in the cells to be filled, or a search by decrementing the value in the cells to be filled) in order to check whether the grid has multiple possible solutions.
@@ -18,7 +18,7 @@ public class SudokuSolver {
 	 * Logger creation
 	 */
 
-	final static Logger log = LogManager.getLogger(com.jbme.sudoku_solver.SudokuSolver.class);
+	 private static final Logger log = LoggerFactory.getLogger(SudokuSolver.class);
 
     /**
 	 * The array with the sudoku grid to complete.
@@ -68,7 +68,7 @@ public class SudokuSolver {
 	 */
 	public int[][] fillSudokuGrid(int direction) {
 
-	
+
 		getCellsToSolve();
 
 		showOrder();// optionnel - - only actif when log4j is on DEBUG
@@ -292,7 +292,7 @@ public class SudokuSolver {
 		do {
 			sudokuGrid[x][y]++;// incrementing current cell value
 
-			log.trace("coordinate x:" + x + " y:" + y + " " + "value=" + sudokuGrid[x][x]);
+			log.trace("coordinate x:" + x + " y:" + y + " " + "value=" + sudokuGrid[x][y]);
 
 		} while ((compareValueWithRow(sudokuGrid[x][y], x, y) || scanColonne(sudokuGrid[x][y], x, y)) && sudokuGrid[x][y] <= 9);
 		// as long as there is at least one cell with the same value in the row or column,
@@ -419,6 +419,8 @@ public class SudokuSolver {
 		}
 		return valueInColumn;
 	}
+
+	
 
 }
 

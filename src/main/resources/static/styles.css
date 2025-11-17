@@ -1,0 +1,90 @@
+button {
+    width: fit-content;
+    height: 25px;
+    border-radius: 5px;
+    border-color: black;
+    background-color: rgb(152, 245, 180);
+}
+
+#container {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+
+}
+
+.toSolve {
+    display: flex;
+    width: fit-content;
+    flex-direction: column;
+    align-items: center;
+
+
+}
+
+.solution {
+    display: flex;
+    text-align: center;
+    width: fit-content;
+    flex-direction: column;
+    align-items: center;
+}
+
+#gridSolution {
+    display: grid;
+    grid-template-columns: repeat(9, 50px);
+    padding: 0%;
+    margin: 0%;
+
+}
+
+#noSolutionText {
+    margin: auto;
+    justify-content: center;
+    align-content: center;
+    color: red;
+    font-weight: 100;
+
+}
+
+
+#gridToSolve {
+
+    display: grid;
+    grid-template-columns: repeat(9, 50px);
+    padding: 0%;
+    margin: 0%;
+
+
+}
+
+.cell {
+    margin: 5px;
+    padding: 2px;
+    appearance: textfield;
+    background-color: rgb(223, 223, 223);
+    aspect-ratio: 1 / 1;
+    border-style: solid;
+    border-width: 2px;
+    border-color: black;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 1 rem;
+}
+
+.solutionCell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 5px;
+    padding: 2px;
+    background-color: rgb(176, 255, 174);
+    aspect-ratio: 1 / 1;
+    border-style: solid;
+    border-width: 2px;
+    border-color: black;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 1 rem;
+
+}

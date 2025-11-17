@@ -5,22 +5,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- This class allows the solving of a Sudoku board. Two different solving algorithms are available (a search by incrementing the value in the cells to be filled, or a search by decrementing the value in the cells to be filled) in order to check whether the grid has multiple possible solutions.
+ * This class allows the solving of a Sudoku board. Two different solving
+ * algorithms are available (a search by incrementing the value in the cells to
+ * be filled, or a search by decrementing the value in the cells to be filled)
+ * in order to check whether the grid has multiple possible solutions.
  * 
  * @author Jean-Baptiste MEYRIEUX
  *
  */
 
-
 public class SudokuSolver {
 
-    /**
+	/**
 	 * Logger creation
 	 */
 
-	 private static final Logger log = LoggerFactory.getLogger(SudokuSolver.class);
+	private static final Logger log = LoggerFactory.getLogger(SudokuSolver.class);
 
-    /**
+	/**
 	 * The array with the sudoku grid to complete.
 	 *
 	 * <ul>
@@ -30,7 +32,7 @@ public class SudokuSolver {
 	 */
 	private int[][] sudokuGrid;
 
-    /**
+	/**
 	 * An array containin the coordinate of the cells to fill, order by priority.
 	 */
 	private ArrayList<int[]> cellsToSolve = new ArrayList<int[]>();
@@ -45,7 +47,7 @@ public class SudokuSolver {
 	}
 
 	/**
-	 * "setters" to initialize the sudoku grid. 
+	 * "setters" to initialize the sudoku grid.
 	 * 
 	 * @param tableau Sudoku Grid to fill.
 	 */
@@ -55,26 +57,133 @@ public class SudokuSolver {
 	}
 
 	/**
+	 * Validates the initial Sudoku grid to ensure it follows Sudoku rules.
+	 * 
+	 * @return true if the grid is valid, false otherwise.
+	 */
+	public boolean validateGrid() {
+		// Check rows and columns
+		for (int i = 0; i < 9; i++) {
+			if (!isValidGroup(getRow(i)) || !isValidGroup(getColumn(i))) {
+				return false;
+			}
+		}
+
+		// Check 3x3 subgrids
+		for (int row = 0; row < 9; row += 3) {
+			for (int col = 0; col < 9; col += 3) {
+				if (!isValidGroup(getSubgrid(row, col))) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks if a group (row, column, or subgrid) contains no duplicate values.
+	 * 
+	 * @param group An array representing a group of 9 cells.
+	 * @return true if the group is valid, false otherwise.
+	 */
+	private boolean isValidGroup(int[] group) {
+		boolean[] seen = new boolean[10]; // Index 1-9 for Sudoku values
+		for (int value : group) {
+			if (value != 0) { // Ignore empty cells
+				if (seen[value]) {
+					return false; // Duplicate found
+				}
+				seen[value] = true;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Extracts a row from the Sudoku grid.
+	 * 
+	 * @param row The row index.
+	 * @return An array representing the row.
+	 */
+	private int[] getRow(int row) {
+		return sudokuGrid[row];
+	}
+
+	/**
+	 * Extracts a column from the Sudoku grid.
+	 * 
+	 * @param col The column index.
+	 * @return An array representing the column.
+	 */
+	private int[] getColumn(int col) {
+		int[] column = new int[9];
+		for (int i = 0; i < 9; i++) {
+			column[i] = sudokuGrid[i][col];
+		}
+		return column;
+	}
+
+	/**
+	 * Extracts a 3x3 subgrid from the Sudoku grid.
+	 * 
+	 * @param startRow The starting row index of the subgrid.
+	 * @param startCol The starting column index of the subgrid.
+	 * @return An array representing the subgrid.
+	 */
+	private int[] getSubgrid(int startRow, int startCol) {
+		int[] subgrid = new int[9];
+		int index = 0;
+		for (int row = startRow; row < startRow + 3; row++) {
+			for (int col = startCol; col < startCol + 3; col++) {
+				subgrid[index++] = sudokuGrid[row][col];
+			}
+		}
+		return subgrid;
+	}
+
+	private boolean scanSubgrid(int valueToCompare, int x, int y) {
+		int startRow = (x / 3) * 3;
+		int startCol = (y / 3) * 3;
+		for (int i = startRow; i < startRow + 3; i++) {
+			for (int j = startCol; j < startCol + 3; j++) {
+				if (i == x && j == y)
+					continue; // skip the cell itself
+				if (sudokuGrid[i][j] == valueToCompare) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Main methods of the class, which fill the sudoku grid.
 	 * 
-	 * @param direction Parameter used to define the search direction for allowed values in the cells to be filled.
+	 * @param direction Parameter used to define the search direction for allowed
+	 *                  values in the cells to be filled.
 	 * 
-	 * <ul>
-	 * <li>1: ascending (incrementing the value in the target cell)
-	 * <li>2: descending (decrementing the value in the target cell)
-	 * </ul>
+	 *                  <ul>
+	 *                  <li>1: ascending (incrementing the value in the target cell)
+	 *                  <li>2: descending (decrementing the value in the target
+	 *                  cell)
+	 *                  </ul>
 	 * 
 	 * @return The filled sudoku grid or "null".
 	 */
 	public int[][] fillSudokuGrid(int direction) {
-
+		// Validate the initial grid
+		if (!validateGrid()) {
+			log.warn("The provided Sudoku grid is invalid.");
+			return null; // Return null if the grid is invalid
+		}
 
 		getCellsToSolve();
 
 		showOrder();// optionnel - - only actif when log4j is on DEBUG
 
 		// scan the list and search for the value for each cell in this
-        // list, according to the chosen fill direction
+		// list, according to the chosen fill direction
 		if (scanList(direction) == true) {
 
 			return sudokuGrid;
@@ -86,12 +195,13 @@ public class SudokuSolver {
 	}
 
 	/**
-     * This method adds all the cells to be filled in to a list
-     * sorted by priority. The “cells” are in the form of an array (of
-     * size 3). Index [0] corresponds to the priority, index [1] corresponds to the
-     * x-coordinate, and index [2] corresponds to the y-coordinate.
-     */
+	 * This method adds all the cells to be filled in to a list
+	 * sorted by priority. The “cells” are in the form of an array (of
+	 * size 3). Index [0] corresponds to the priority, index [1] corresponds to the
+	 * x-coordinate, and index [2] corresponds to the y-coordinate.
+	 */
 	public void getCellsToSolve() {
+		cellsToSolve.clear();
 		/**
 		 * x = row
 		 */
@@ -100,19 +210,18 @@ public class SudokuSolver {
 		 * y = column
 		 */
 		int y = 0;
-		for (x = 0; x < 9; x++) {//horizontal and vertical scan
+		for (x = 0; x < 9; x++) {// horizontal and vertical scan
 			for (y = 0; y < 9; y++) {
 
 				if (sudokuGrid[x][y] == 0) {// if the value of the cell is 0, it is a cell to fill
-											
 
-					int priorityValue = getPriorityValue(x, y); 
+					int priorityValue = getPriorityValue(x, y);
 
 					int[] cellToAddToPriorityList = { priorityValue, x, y };// combine priority value and coordinate
-																					
-					addToSortedList(cellToAddToPriorityList);   // Call the method to add this cell to the right
-                                                                // place in our list of cells to be filled in
-                                                                // according to priority.
+
+					addToSortedList(cellToAddToPriorityList); // Call the method to add this cell to the right
+																// place in our list of cells to be filled in
+																// according to priority.
 
 				}
 			}
@@ -122,13 +231,14 @@ public class SudokuSolver {
 
 	/**
 	 * Method that returns the priority value of the cells to be filled in at
-     * coordinates x and y. The index is the sum of all cells already
-     * predefined in the same row and column as the target cell. The higher this
-     * number, the higher the priority of the cell..
+	 * coordinates x and y. The index is the sum of all cells already
+	 * predefined in the same row and column as the target cell. The higher this
+	 * number, the higher the priority of the cell..
 	 * 
 	 * @param x x coordinate of the sudoku.
 	 * @param y y coordinate of the sudoku.
-	 * @return countNb Number of cells predefined in row and column of target = priority value.
+	 * @return countNb Number of cells predefined in row and column of target =
+	 *         priority value.
 	 */
 	public int getPriorityValue(int x, int y) {
 		int countNb = 0;
@@ -149,23 +259,25 @@ public class SudokuSolver {
 
 	/**
 	 * This method adds the cells to be filled in to a list, in order
-     * according to their priority value (from the highest index to the
-     * lowest).
+	 * according to their priority value (from the highest index to the
+	 * lowest).
 	 * 
 	 * @param cellToAddToPriorityList array representing the cell. It contains:
 	 * 
-	 *                                       <ul>
-	 *                                       <li>[0] priority value
-	 *                                       <li>[1] x coordinate
-	 *                                       <li>[2] y coordinate
-	 *                                       </ul>
+	 *                                <ul>
+	 *                                <li>[0] priority value
+	 *                                <li>[1] x coordinate
+	 *                                <li>[2] y coordinate
+	 *                                </ul>
 	 * 
 	 */
+
 	public void addToSortedList(int[] cellToAddToPriorityList) {
 
 		boolean cellWasAdded = false;
 
-		//sweep the list and compare priority value to insert the cell in the right place
+		// sweep the list and compare priority value to insert the cell in the right
+		// place
 		for (int i = 0; i < cellsToSolve.size(); i++) {
 			if (cellToAddToPriorityList[0] > cellsToSolve.get(i)[0]) {
 				cellsToSolve.add(i, cellToAddToPriorityList);
@@ -174,8 +286,8 @@ public class SudokuSolver {
 
 			}
 		}
-		
-        //if priority smaller than all other cells, it is added to the end
+
+		// if priority smaller than all other cells, it is added to the end
 		if (cellWasAdded == false) {
 			cellsToSolve.add(cellToAddToPriorityList);
 
@@ -192,16 +304,16 @@ public class SudokuSolver {
 
 			for (int j = 0; j < 3; j++) {
 				switch (j) {
-				case 0:
-					log.debug("priority: " + cellsToSolve.get(i)[j]);
-					break;
+					case 0:
+						log.debug("priority: " + cellsToSolve.get(i)[j]);
+						break;
 
-				case 1:
-					log.debug("x: " + cellsToSolve.get(i)[j]);
-					break;
+					case 1:
+						log.debug("x: " + cellsToSolve.get(i)[j]);
+						break;
 
-				case 2:
-					log.debug("y: " + cellsToSolve.get(i)[j] + "\n");
+					case 2:
+						log.debug("y: " + cellsToSolve.get(i)[j] + "\n");
 				}
 			}
 		}
@@ -209,67 +321,76 @@ public class SudokuSolver {
 
 	/**
 	 * Method that scans the list of cells which need to be solved in order of
-     * priority and calls a method to search for an authorized value for
-     * each cell. The method called depends on the “direction” parameter.
+	 * priority and calls a method to search for an authorized value for
+	 * each cell. The method called depends on the “direction” parameter.
 	 * 
-	 * @param direction Depending on the scenario chosen, the method will launch a different algorithm
-     *            to search for the value of the cell.
+	 * @param direction Depending on the scenario chosen, the method will launch a
+	 *                  different algorithm
+	 *                  to search for the value of the cell.
 	 * 
-	 *            <ul>
-     *            <li>1: “ascending” search by incrementing the value in
-     *            the target cell
-     *            <li>2: “descending” search by decrementing the value
-     *            in the target cell
-     *            </ul>
+	 *                  <ul>
+	 *                  <li>1: “ascending” search by incrementing the value in
+	 *                  the target cell
+	 *                  <li>2: “descending” search by decrementing the value
+	 *                  in the target cell
+	 *                  </ul>
 	 * 
 	 * @return solutionFound Boolean to indicate whether a solution has been found
-     *         and all cells are filled.
+	 *         and all cells are filled.
 	 */
 	public boolean scanList(int direction) {
 
 		boolean solutionFound = true;
+		int maxIterations = 100000; // or another reasonable number
+		int iterations = 0;
 
 		switch (direction) {
 
-		case 1:
-			int i = 0;
-			while (i < cellsToSolve.size() && i >= 0) {
+			case 1:
+				int i = 0;
+				while (i < cellsToSolve.size() && i >= 0) {
+					if (++iterations > maxIterations) {
+						log.warn("Maximum iterations reached, aborting to prevent infinite loop.");
+						return false;
+					}
+					int x = cellsToSolve.get(i)[1];// get row coordinate
+					int y = cellsToSolve.get(i)[2];// get column coordinate
 
-				int x = cellsToSolve.get(i)[1];// get row coordinate
-				int y = cellsToSolve.get(i)[2];// get column coordinate
+					if (searchCellValueAscending(x, y) == true) {// call method to search cell value
+						i++;// if a value is found we continue
+					} else {
+						i--;// else we go back to previous cell
+					}
 
-				if (searchCellValueAscending(x, y) == true) {//call method to search cell value
-					i++;// if a value is found we continue
-				} else {
-					i--;// else we go back to previous cell
 				}
+				if (i != cellsToSolve.size()) {// check if grid is complete
 
-			}
-			if (i != cellsToSolve.size()) {// check if grid is complete
-
-				solutionFound = false;
-			}
-			break;
-
-		case 2:
-			int j = 0;
-			while (j < cellsToSolve.size() && j >= 0) {
-
-				int x = cellsToSolve.get(j)[1];// get row coordinate
-				int y = cellsToSolve.get(j)[2];// get column coordinate
-
-				if (searchCellValueDescending(x, y) == true) {//call method to search cell value
-					j++;// if a value is found we continue
-				} else {
-					j--;// else we go back to previous cell
+					solutionFound = false;
 				}
+				break;
 
-			}
-			if (j != cellsToSolve.size()) {// check if grid is complete
+			case 2:
+				int j = 0;
+				while (j < cellsToSolve.size() && j >= 0) {
+					if (++iterations > maxIterations) {
+						log.warn("Maximum iterations reached, aborting to prevent infinite loop.");
+						return false;
+					}
+					int x = cellsToSolve.get(j)[1];// get row coordinate
+					int y = cellsToSolve.get(j)[2];// get column coordinate
 
-				solutionFound = false;
-			}
-			break;
+					if (searchCellValueDescending(x, y) == true) {// call method to search cell value
+						j++;// if a value is found we continue
+					} else {
+						j--;// else we go back to previous cell
+					}
+
+				}
+				if (j != cellsToSolve.size()) {// check if grid is complete
+
+					solutionFound = false;
+				}
+				break;
 
 		}
 
@@ -278,10 +399,10 @@ public class SudokuSolver {
 
 	/**
 	 * Method that searches for an authorized value for a cell to be filled in. This
-     * “ascending” algorithm works by incrementing the value in the cell and
-     * comparing it with all the other cells in the
-     * same row and column.
-     * 
+	 * “ascending” algorithm works by incrementing the value in the cell and
+	 * comparing it with all the other cells in the
+	 * same row and column.
+	 * 
 	 * @param x x coordinate of sudoku grid
 	 * @param y y coordinate of sudoku grid
 	 * @return cellSolved Boolean showing if a value was found for the cell
@@ -294,18 +415,23 @@ public class SudokuSolver {
 
 			log.trace("coordinate x:" + x + " y:" + y + " " + "value=" + sudokuGrid[x][y]);
 
-		} while ((compareValueWithRow(sudokuGrid[x][y], x, y) || scanColonne(sudokuGrid[x][y], x, y)) && sudokuGrid[x][y] <= 9);
-		// as long as there is at least one cell with the same value in the row or column,
-        // restart the loop to increment the value in our cell
-        // if the value of our cell is not in the row, we can move on to the next one
-        // if the value of our current cell is at its maximum (9), we exit the loop
+		} while ((scanRow(sudokuGrid[x][y], x, y)
+				|| scanColonne(sudokuGrid[x][y], x, y)
+				|| scanSubgrid(sudokuGrid[x][y], x, y))
+						&& sudokuGrid[x][y] <= 9);
+		// as long as there is at least one cell with the same value in the row or
+		// column,
+		// restart the loop to increment the value in our cell
+		// if the value of our cell is not in the row, we can move on to the next one
+		// if the value of our current cell is at its maximum (9), we exit the loop
 
 		if (sudokuGrid[x][y] > 9) {
-			// If the value of this cell is greater than 9 (not possible), and no combination works,
-            // we will try to increment the previous cell in the priority list
-            // that allows it.
-            // To do this, we return a Boolean: false
-            // and reset the value of the cell to zero.
+			// If the value of this cell is greater than 9 (not possible), and no
+			// combination works,
+			// we will try to increment the previous cell in the priority list
+			// that allows it.
+			// To do this, we return a Boolean: false
+			// and reset the value of the cell to zero.
 			sudokuGrid[x][y] = 0;
 
 			log.trace("No solution found. return to the previous cell in the priority order." + "\n");
@@ -322,11 +448,11 @@ public class SudokuSolver {
 
 	/**
 	 * Method that searches for an authorized value for a cell to be filled in. This
-     * "descending" algorithm works by decrementing the value in the cell and
-     * comparing it with all the other cells in the
-     * same row and column.
+	 * "descending" algorithm works by decrementing the value in the cell and
+	 * comparing it with all the other cells in the
+	 * same row and column.
 	 * 
-	* @param x x coordinate of sudoku grid
+	 * @param x x coordinate of sudoku grid
 	 * @param y y coordinate of sudoku grid
 	 * @return cellSolved Boolean showing if a value was found for the cell
 	 */
@@ -337,25 +463,29 @@ public class SudokuSolver {
 		if (sudokuGrid[x][y] == 0) {
 			sudokuGrid[x][y] = 10;
 			// if the value is at zero, reset the value to 10, so that the first value to be
-            // compared is 9
+			// compared is 9
 		}
 
 		do {
 			log.trace("coordinate x:" + x + " y:" + y + " " + "value=" + sudokuGrid[x][y]);
 
 			sudokuGrid[x][y]--;
-		} while ((compareValueWithRow(sudokuGrid[x][y], x, y) || scanColonne(sudokuGrid[x][y], x, y)) && sudokuGrid[x][y] >= 1);
-		// as long as there is at least one cell with the same value in the row or column,
-        // restart the loop to decrement the value in our cell
-        // if the value of the cell is not in the row, we can move on to the next one
-        // if the value of our current cell is at its maximum (9), we exit the loop
+		} while ((scanRow(sudokuGrid[x][y], x, y)
+				|| scanColonne(sudokuGrid[x][y], x, y)
+				|| scanSubgrid(sudokuGrid[x][y], x, y))
+				&& sudokuGrid[x][y] >= 1);
+		// as long as there is at least one cell with the same value in the row or
+		// column,
+		// restart the loop to decrement the value in our cell
+		// if the value of the cell is not in the row, we can move on to the next one
+		// if the value of our current cell is at its maximum (9), we exit the loop
 
 		if (sudokuGrid[x][y] == 0) {
-			// If the value of this cell is smaller than 1 (not possible), and no combination works,
-            // we will try to decrement the previous cell in the  priority list
-            // that allows it.
-            // To do this, we return a Boolean: false
- 
+			// If the value of this cell is smaller than 1 (not possible), and no
+			// combination works,
+			// we will try to decrement the previous cell in the priority list
+			// that allows it.
+			// To do this, we return a Boolean: false
 
 			log.trace("No solution found. return to the previous cell in the priority order." + "\n");
 			cellSolved = false;
@@ -370,15 +500,16 @@ public class SudokuSolver {
 	}
 
 	/**
-	 * Method that compares a value of a cell with those contained in the rest of the row
-     * in order to determine whether this value is alread in use.
+	 * Method that compares a value of a cell with those contained in the rest of
+	 * the row
+	 * in order to determine whether this value is alread in use.
 	 * 
 	 * @param valueToCompare The Value to compare with the rest of the row
-	 * @param x               x coordinate of the sudoku grid
-	 * @param y               y coordinate of the sudoku grid
+	 * @param x              x coordinate of the sudoku grid
+	 * @param y              y coordinate of the sudoku grid
 	 * @return valueInRow Boolean true if the value is already in the row
 	 */
-	public boolean compareValueWithRow(int valueToCompare, int x, int y) {
+	public boolean scanRow(int valueToCompare, int x, int y) {
 
 		boolean valueInRow = false;
 		for (int i = 0; i < 9; i++) {
@@ -395,13 +526,14 @@ public class SudokuSolver {
 	}
 
 	/**
-	 * Method that compares a value of a cell with those contained in the rest of the row
-     * in order to determine whether this value is alread in use.
+	 * Method that compares a value of a cell with those contained in the rest of
+	 * the row
+	 * in order to determine whether this value is alread in use.
 	 * 
 	 * @param valueToCompare The Value to compare with the rest of the column
-	 *                        
-	 * @param x               x coordinate of the sudoku grid.
-	 * @param y               y coordinate of the sudoku grid.
+	 * 
+	 * @param x              x coordinate of the sudoku grid.
+	 * @param y              y coordinate of the sudoku grid.
 	 * @return valueInColumn BBoolean true if the value is already in the row
 	 */
 	public boolean scanColonne(int valueToCompare, int x, int y) {
@@ -420,8 +552,4 @@ public class SudokuSolver {
 		return valueInColumn;
 	}
 
-	
-
 }
-
-

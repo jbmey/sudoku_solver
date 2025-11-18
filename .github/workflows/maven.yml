@@ -9,6 +9,11 @@ on:
   pull_request:
     branches: [ "Sudoku_Solver_web", "main" ]
 
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
 jobs:
   build:
     runs-on: ubuntu-latest

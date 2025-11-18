@@ -79,4 +79,5 @@ jobs:
         directory: .
         maven-args: '-Dmaven.test.skip=true'
         token: ${{ secrets.GITHUB_TOKEN }}
+        ignore-maven-wrapper: true
       continue-on-error: true

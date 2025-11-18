@@ -30,10 +30,10 @@ jobs:
     - name: Run tests
       run: mvn test
       
-    # Optional: Upload dependency graph only on main/master branch and if GITHUB_TOKEN has required permissions
-    - name: Update dependency graph
+    # Generate and upload artifacts (optional)
+    - name: Upload build artifacts
       if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/Sudoku_Solver_web'
-      uses: advanced-security/maven-dependency-submission-action@v4
+      uses: actions/upload-artifact@v4
       with:
-        directory: .
-      continue-on-error: true
+        name: jar-artifacts
+        path: target/*.jar

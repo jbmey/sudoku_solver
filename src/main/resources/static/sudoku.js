@@ -8,7 +8,8 @@ const gridSolution = document.querySelector("#gridSolution");
 const noSolutionText = document.querySelector("#noSolutionText");
 const validate = document.querySelector("#validate");
 validate.addEventListener(`click`, () => solveGrid());
-const otherSolution = document.querySelector("#moreSolutions");
+const solution1 = document.querySelector("#solution1");
+const solution2 = document.querySelector("#solution2");
 const clear = document.querySelector("#clear");
 clear.addEventListener(`click`, () => clearGrid());
 
@@ -65,6 +66,9 @@ function setBlankGrid() {
             cell.setAttribute("max", "9");
             cell.setAttribute("id", `x${j} y${i}`);
             cell.setAttribute("class", "cell");
+            if ((Math.floor(i / 3) + Math.floor(j / 3)) % 2 === 0) {
+                cell.classList.add("subgrid");
+            }
             gridToSolve.appendChild(cell);
 
         }
@@ -116,16 +120,17 @@ function processResponse(json) {
     result2 = json.solution2;
     multipleSolution = json.multiplesSolutions;
     noSolution = json.noSolution;
-    solutionContainer.style.display = "flex";
     if (noSolution) {
         displayNoSolution();
 
     } else {
         displayResult(result1);
         if (!multipleSolution) {
-            otherSolution.disabled = true;
+            solution1.disabled = true;
+            solution2.disabled = true;
         } else {
-            otherSolution.addEventListener(`click`, () => displayResult(result2));
+            solution1.addEventListener(`click`, () => displayResult(result1));
+            solution2.addEventListener(`click`, () => displayResult(result2));
         }
     }
 
@@ -144,6 +149,9 @@ function displayResult(solution) {
             let cellContent = document.createTextNode(`${solution[i][j]}`);
             cell.appendChild(cellContent);
             cell.setAttribute("class", "solutionCell");
+            if ((Math.floor(i / 3) + Math.floor(j / 3)) % 2 === 0) {
+                cell.classList.add("subgrid");
+            }
             gridSolution.append(cell);
         }
 
@@ -153,7 +161,9 @@ function displayResult(solution) {
 function displayNoSolution() {
     solutionContainer.style.display = "flex";
     noSolutionText.style.display = "block";
-    otherSolution.style.display = "none";
+    solution1.style.display = "none";
+    solution2.style.display = "none";
+
 }
 
 function empty(element) {

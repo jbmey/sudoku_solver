@@ -61,7 +61,7 @@ jobs:
         name: jar-artifacts
         path: target/*.jar
 
-  dependency-submission:
+  dependency-analysis:
     runs-on: ubuntu-latest
     needs: [build, test]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/Sudoku_Solver_web'
@@ -77,12 +77,21 @@ jobs:
         distribution: 'temurin'
         cache: maven
         
-    # Upload dependency graph to GitHub
-    - name: Submit Dependencies
-      uses: advanced-security/maven-dependency-submission-action@v3.0.3
+    # Generate dependency reports as artifacts instead of GitHub API submission
+    - name: Generate Dependency Reports
+      run: |
+        echo "Generating dependency tree..."
+        mvn dependency:tree -DoutputFile=dependency-tree.txt -DoutputType=text
+        mvn dependency:tree -DoutputFile=dependency-tree.json -DoutputType=json || true
+        mvn dependency:analyze-report || true
+        echo "Dependency analysis complete"
+        
+    - name: Upload Dependency Reports
+      uses: actions/upload-artifact@v4
       with:
-        directory: .
-        maven-args: '-Dmaven.test.skip=true'
-        token: ${{ secrets.GITHUB_TOKEN }}
-        ignore-maven-wrapper: true
-      continue-on-error: true
+        name: dependency-reports
+        path: |
+          dependency-tree.txt
+          dependency-tree.json
+          target/site/dependency-analysis.html
+        retention-days: 30

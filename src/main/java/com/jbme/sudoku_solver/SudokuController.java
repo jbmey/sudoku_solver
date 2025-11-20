@@ -31,7 +31,12 @@ public class SudokuController {
         solver.setGrid(copyGrid(grid));
         int[][] result2 = solver.fillSudokuGrid(2);
         
-        return new SudokuResponse(result1, result2);
+        SudokuResponse response = new SudokuResponse(result1, result2);
+        
+        // Log the complete response to console
+        solver.logResponseToConsole(response);
+        
+        return response;
     }
 
      /**

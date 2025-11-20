@@ -347,6 +347,93 @@ public class SudokuSolver {
 	    /**
      * Simple class to represent a cell position in the grid
      */
+    /**
+     * Logs the complete sudoku grid solution to the console in a formatted way
+     * 
+     * @param grid The solved sudoku grid to log
+     * @param solutionType Description of the solution type (e.g., "Solution 1 (Ascending)", "Solution 2 (Descending)")
+     */
+    public void logSolutionToConsole(int[][] grid, String solutionType) {
+        if (grid == null) {
+            logger.info("{}: No solution found", solutionType);
+            return;
+        }
+        
+        logger.info("=== {} ===", solutionType);
+        StringBuilder gridOutput = new StringBuilder();
+        gridOutput.append("\n");
+        
+        for (int row = 0; row < GRID_SIZE; row++) {
+            if (row % 3 == 0 && row != 0) {
+                gridOutput.append("      ------+-------+------\n");
+            }
+            
+            gridOutput.append("      ");
+            for (int col = 0; col < GRID_SIZE; col++) {
+                if (col % 3 == 0 && col != 0) {
+                    gridOutput.append("| ");
+                }
+                gridOutput.append(grid[row][col]).append(" ");
+            }
+            gridOutput.append("\n");
+        }
+        
+        logger.info(gridOutput.toString());
+    }
+
+    /**
+     * Logs both solutions from a SudokuResponse to the console
+     * 
+     * @param response The SudokuResponse containing both solutions
+     */
+    public void logResponseToConsole(SudokuResponse response) {
+        logger.info("=== SUDOKU SOLVING RESULTS ===");
+        
+        if (response.getSolution1() != null) {
+            logSolutionToConsole(response.getSolution1(), "Solution 1 (Ascending 1-9)");
+        }
+        
+        if (response.getSolution2() != null) {
+            logSolutionToConsole(response.getSolution2(), "Solution 2 (Descending 9-1)");
+        }
+        
+        // Check if solutions are identical or different
+        if (response.getSolution1() != null && response.getSolution2() != null) {
+            boolean identical = areGridsIdentical(response.getSolution1(), response.getSolution2());
+            if (identical) {
+                logger.info("=== ANALYSIS: Both solutions are IDENTICAL - Unique solution found ===");
+            } else {
+                logger.info("=== ANALYSIS: Solutions are DIFFERENT - Multiple solutions exist ===");
+            }
+        } else if (response.getSolution1() == null && response.getSolution2() == null) {
+            logger.warn("=== ANALYSIS: NO SOLUTIONS FOUND - Unsolvable puzzle ===");
+        } else {
+            logger.warn("=== ANALYSIS: Only one algorithm found a solution - Possible implementation issue ===");
+        }
+    }
+
+    /**
+     * Helper method to compare two grids for equality
+     * 
+     * @param grid1 First grid to compare
+     * @param grid2 Second grid to compare
+     * @return true if grids are identical, false otherwise
+     */
+    private boolean areGridsIdentical(int[][] grid1, int[][] grid2) {
+        if (grid1 == null || grid2 == null) {
+            return false;
+        }
+        
+        for (int row = 0; row < GRID_SIZE; row++) {
+            for (int col = 0; col < GRID_SIZE; col++) {
+                if (grid1[row][col] != grid2[row][col]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     private static class CellPosition {
         final int row;
         final int column;

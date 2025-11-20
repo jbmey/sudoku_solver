@@ -1,20 +1,14 @@
 console.log("sudoku.js loaded successfully");
 
-const container = document.querySelector("#container");
-const solutionContainer = document.querySelector(".solution");
-solutionContainer.style.display = "none";
+
 const gridToSolve = document.querySelector("#gridToSolve");
-const gridSolution = document.querySelector("#gridSolution");
 const noSolutionText = document.querySelector("#noSolutionText");
 const validate = document.querySelector("#validate");
 validate.addEventListener(`click`, () => solveGrid());
-const solution1 = document.querySelector("#solution1");
-const solution2 = document.querySelector("#solution2");
 const clear = document.querySelector("#clear");
 clear.addEventListener(`click`, () => clearGrid());
-
-
-
+const btnSolution1 = document.querySelector("#btnSolution1");
+const btnSolution2 = document.querySelector("#btnSolution2");
 
 setBlankGrid();
 
@@ -28,23 +22,27 @@ cellInputs.forEach((cellInput) =>
         if (value < min) this.value = "";
         if (value > max) this.value = max;
         if (isNaN(value)) this.value = "";
+
+        if (value != '') this.classList.toggle("cellOrigin");
     }
     )
 );
 
 function initDisplay() {
-    solutionContainer.style.display = "none";
+    gridToSolve.classList.remove("redBg");
+    gridToSolve.classList.remove("greenBg");
     noSolutionText.style.display = "none";
+    toggleSolutionButton("off");
 }
 
 function solveGrid() {
     initDisplay();
     let row = []
     let grid = [];
-    for (let i = 0; i < 9; i++) {
+    for (let r = 0; r < 9; r++) {
         row = []
-        for (let j = 0; j < 9; j++) {
-            let value = parseInt(document.getElementById(`x${j} y${i}`).value);
+        for (let c = 0; c < 9; c++) {
+            let value = parseInt(document.getElementById(`r${r} c${c}`).value);
             if (isNaN(value)) {
                 value = 0;
             }
@@ -58,15 +56,16 @@ function solveGrid() {
 
 
 function setBlankGrid() {
-    for (let i = 0; i < 9; i++) {
-        for (let j = 0; j < 9; j++) {
+    initDisplay();
+    for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
             let cell = document.createElement("input");
             cell.setAttribute("type", "number");
             cell.setAttribute("min", "0");
             cell.setAttribute("max", "9");
-            cell.setAttribute("id", `x${j} y${i}`);
+            cell.setAttribute("id", `r${r} c${c}`);
             cell.setAttribute("class", "cell");
-            if ((Math.floor(i / 3) + Math.floor(j / 3)) % 2 === 0) {
+            if ((Math.floor(r / 3) + Math.floor(c / 3)) % 2 === 0) {
                 cell.classList.add("subgrid");
             }
             gridToSolve.appendChild(cell);
@@ -75,21 +74,19 @@ function setBlankGrid() {
 
     }
 
+
 }
 
 function clearGrid() {
     for (const child of gridToSolve.children) {
         child.value = "";
     }
-    for (const child of gridSolution.children) {
-        child.value = "";
-    }
+
+    cellInputs.forEach((cell) =>
+        cell.classList.remove("cellOrigin"));
     initDisplay();
+    toggleSolutionButton("off");
 }
-
-
-
-
 
 async function sendSolveRequest(grid) {
     try {
@@ -122,60 +119,59 @@ function processResponse(json) {
     noSolution = json.noSolution;
     if (noSolution) {
         displayNoSolution();
-
     } else {
         displayResult(result1);
         if (!multipleSolution) {
-            solution1.disabled = true;
-            solution2.disabled = true;
+            toggleSolutionButton("off");
         } else {
-            solution1.addEventListener(`click`, () => displayResult(result1));
-            solution2.addEventListener(`click`, () => displayResult(result2));
+            toggleSolutionButton("on");
+            btnSolution1.addEventListener(`click`, () => displayResult(result1));
+            btnSolution2.addEventListener(`click`, () => displayResult(result2));
         }
     }
 
 }
 
 function displayResult(solution) {
-    empty(gridSolution);
-    for (const child of gridSolution.children) {
-        child.value = "";
-    }
-    solutionContainer.style.display = "flex";
-    empty(gridSolution);
-    for (let i = 0; i < 9; i++) {
-        for (let j = 0; j < 9; j++) {
-            let cell = document.createElement("span");
-            let cellContent = document.createTextNode(`${solution[i][j]}`);
-            cell.appendChild(cellContent);
-            cell.setAttribute("class", "solutionCell");
-            if ((Math.floor(i / 3) + Math.floor(j / 3)) % 2 === 0) {
-                cell.classList.add("subgrid");
-            }
-            gridSolution.append(cell);
+    gridToSolve.classList.add("greenBg");
+    let r;
+    let c;
+    cellInputs.forEach((cell) => {
+        if (!cell.classList.contains("cellOrigin")) {
+            r = cell.id.charAt(1);
+            c = cell.id.charAt(4);
+            cell.value = solution[r][c];
         }
-
     }
+
+    )
 }
+
 
 function displayNoSolution() {
-    solutionContainer.style.display = "flex";
+    gridToSolve.classList.add("redBg");
+    toggleSolutionButton("off");
     noSolutionText.style.display = "block";
-    solution1.style.display = "none";
-    solution2.style.display = "none";
-
 }
 
-function empty(element) {
-    for (const child of element.children) {
-        child.value = "";
-    }
-    while (element.firstElementChild) {
-        element.firstElementChild.remove();
-    }
+function toggleSolutionButton(state) {
+    switch (state) {
+        case "on":
+            btnSolution1.disabled = false;
+            btnSolution2.disabled = false;
+            btnSolution1.style.display = "block";
+            btnSolution2.style.display = "block";
+            break;
 
-
+        case "off":
+            btnSolution1.disabled = true;
+            btnSolution2.disabled = true;
+            btnSolution1.style.display = "none";
+            btnSolution2.style.display = "none";
+            break;
+    }
 }
+
 
 
 

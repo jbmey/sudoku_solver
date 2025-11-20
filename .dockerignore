@@ -1,0 +1,51 @@
+# Git files
+.git
+.gitignore
+
+# Documentation
+*.md
+HELP.md
+JAVA_CONFIG.md
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Maven build artifacts (will be rebuilt in container)
+target/
+!target/sudoku_solver-0.0.1.jar
+
+# Logs
+logs/
+*.log
+
+# Test grids (not needed in production)
+testGrid/
+
+# Maven wrapper (not needed in container)
+.mvn/
+mvnw
+mvnw.cmd
+
+# GitHub Actions
+.github/
+
+# Docker files
+Dockerfile
+.dockerignore
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Temporary files
+*.tmp
+*.temp

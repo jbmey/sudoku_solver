@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: sudoku-solver
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    branch: Sudoku_Solver_web
+    buildCommand: ""
+    startCommand: ""
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: JAVA_OPTS
+        value: "-Xmx512m -XX:+UseContainerSupport"
+      - key: SPRING_PROFILES_ACTIVE
+        value: production

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<title>Sudoku Solver</title>
+	<meta name="description" content="" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<base href="/" />
+	<link rel="stylesheet" href="styles.css">
+
+</head>
+
+<body>
+	<header>
+		<h1>Sudoku Solver</h1>
+	</header>
+	<main>
+		<div id="container">
+			<div class="toSolve">
+				<div id="gridToSolve"></div>
+				<div id="noSolutionText"><p>------------
+				There is no Solution for this sudoku grid!
+				----------
+			</p>
+			</div>
+				<div class="buttonContainer">
+					<button id="validate" type="button"> solve the grid</button>
+					<button id="btnSolution1" type="button">Solution 1</button>
+					<button id="btnSolution2" type="button">Solution 2</button>
+					<button id="clear" type="button"> clear the grid</button>
+				</div>
+			</div>
+			
+		</div>
+	</main>
+	<script src="./sudoku.js" defer></script>
+
+</body>
+
+</html>
